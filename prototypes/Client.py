@@ -1,62 +1,30 @@
-from tkinter import *
 from AudioRecorder import AudioRecorder
-from stmpy import Machine, Driver
-from os import system
-import os
-import time
+from ClientMachine import ClientMachine
+from UIManager import UIManager
+from AudioPlayer import AudioPlayer
+from MQTT import MQTT
+from stmpy import Driver
 
-# TODO: Hans
-
-class UIManager():
-
-    def __init__(self, stm):
-        self.stm
-        self.setup()
-    
-    def setup(self):
-        # create a tkinter window
-        root = Tk()             
-        
-        # Open window having dimension 100x100
-        root.geometry('100x100')
-        
-        # Create a Button
-        start_btn = Button(root, text = 'Start', bd = '5',
-                                command = self.on_start)
-
-        stop_btn = Button(root, text = 'Stop', bd = '5',
-        command = self.on_stop)
-        
-        # Set the position of button on the top of window.  
-        start_btn.pack(side = 'top')
-        stop_btn.pack(side = 'top')
-        
-        root.mainloop()
-    
-    def on_start(self):
-        # TODO: Start recording
-        pass
-    def on_stop(self):
-        # TODO: Stop recording
-        pass
-
-
-recorder = AudioRecorder()
-
-
-t0 = {'source': 'initial', 'target': 'ready'}
-t1 = {'trigger': 'start', 'source': 'ready', 'target': 'recording'}
-t2 = {'trigger': 'done', 'source': 'recording', 'target': 'processing'}
-t3 = {'trigger': 'done', 'source': 'processing', 'target': 'ready'}
-
-s_recording = {'name': 'recording', 'do': 'record()', "stop": "stop()"}
-s_processing = {'name': 'processing', 'do': 'process()'}
-
-stm = Machine(name='stm', transitions=[t0, t1, t2, t3], states=[s_recording, s_processing], obj=recorder)
-recorder.stm = stm
-
+# Create STMPY driver that will run all state machines
 driver = Driver()
-driver.add_machine(stm)
+
+player = AudioPlayer(driver)
+
+mqtt = MQTT(player)
+# Create recorder for recording audio
+recorder = AudioRecorder(mqtt)
+
+# TODO: Instantiate real implementation of AudioPlayer and MQTT
+
+# Create ClientMachine, which is where the state machine lives
+client_machine = ClientMachine(driver, recorder, player, mqtt)
+
+# Start state machine driver, state machines should have already been 
+# registered through dependency injection (Passed reference to driver 
+# into each state machine wrappers)
 driver.start()
 
-ui_manager = UIManager(stm)
+# client_machine.state_machine.send()
+
+# Instantiate UIManager, which will render ui in a new window
+ui_manager = UIManager(client_machine)
