@@ -1,7 +1,7 @@
 import pyaundio
 import wave
 
-class Recorder:
+class AudioRecorder:
     def __init__(self):
         self.recording = False
         self.chunk = 1024  # Record in chunks of 1024 samples

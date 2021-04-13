@@ -1,5 +1,5 @@
 from tkinter import *
-from audio_recorder import Recorder
+from AudioRecorder import AudioRecorder
 from stmpy import Machine, Driver
 from os import system
 import os
@@ -41,7 +41,7 @@ class UIManager():
         pass
 
 
-recorder = Recorder()
+recorder = AudioRecorder()
 
 
 t0 = {'source': 'initial', 'target': 'ready'}
