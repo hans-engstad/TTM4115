@@ -23,14 +23,13 @@ class ClientMachine():
         return [
             {'source': 'initial', 'target': 'ready'},
             {'trigger': 'start', 'source': 'ready', 'target': 'recording'},
-            {'trigger': 'done', 'source': 'recording', 'target': 'processing'},
-            {'trigger': 'done', 'source': 'processing', 'target': 'ready'}
+            {'trigger': 'done', 'source': 'recording', 'target': 'ready'},
         ]
     
     def get_states(self):
         return [
+            {'name': 'ready'},
             {'name': 'recording', 'do': 'record()', "stop": "stop_recording()"},
-            {'name': 'processing', 'do': 'process()'}
         ]
     
     def record(self):
@@ -38,8 +37,5 @@ class ClientMachine():
 
     def stop_recording(self):
         self.audio_recorder.stop()
-    
-    def process(self):
-        self.audio_recorder.process()
 
 
