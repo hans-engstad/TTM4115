@@ -14,9 +14,22 @@ class MQTT():
     
     def simulate_recieve_buffer(self):
         # Simulate that entire buffer is recieved by client, one package at a time
-        # while(len(self._buffer) > 0):
-        #     data = self._buffer.pop(0)
-        self.recieve(b''.join(self._buffer))
+        chunk_count = 10  # Number of chunks to play at a time from the buffer
+        while(len(self._buffer) > 0):
+            data = []
+            buffer_index = 9
+            if len(self._buffer) < buffer_index:
+                buffer_index = len(self._buffer) - 1
+            
+            print("Buffer length: ", len(self._buffer))
+            print("Buffer index: ", buffer_index)
+
+            data = self._buffer[0:buffer_index]
+            raw_data = b''.join(data)
+            
+            self.recieve(raw_data)
+            self._buffer = self._buffer[buffer_index+1:]
+        # self.recieve(b''.join(self._buffer))
         self._buffer = []
 
     def recieve(self, message):

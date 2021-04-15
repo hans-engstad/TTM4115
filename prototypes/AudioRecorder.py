@@ -22,9 +22,12 @@ class AudioRecorder:
                 input=True)
         
         self.recording = True
+        print("Recording audio")
         while self.recording:
             data = stream.read(self.chunk)
             self.mqtt.publish("insert_topic_here", data)
+        
+        print("Done recording audio")
 
         # Simulate that all packages are now recieved
         self.mqtt.simulate_recieve_buffer()

@@ -7,7 +7,8 @@ from stmpy import Machine, Driver
 
 class AudioPlayer():
 
-    def __init__(self, driver):
+    def __init__(self, driver, py_audio):
+        self.py_audio = py_audio
         self.state_machine = Machine(
             name="audio_machine", 
             transitions=self._get_transitions(), 
@@ -20,12 +21,9 @@ class AudioPlayer():
         """
         Play all given data
         """
-
-        # Create an interface to PortAudio
-        port_audio = pyaudio.PyAudio()
-
+        print("Starting to play audio")
         # open stream
-        stream = port_audio.open(
+        stream = self.py_audio.open(
             format=pyaudio.paInt16,
             channels=2,
             rate=44100,
@@ -38,10 +36,6 @@ class AudioPlayer():
         # Stop stream
         stream.stop_stream()
         stream.close()
-
-        # Close PyAudio
-        port_audio.terminate()
-
 
 
     def _get_transitions(self):
