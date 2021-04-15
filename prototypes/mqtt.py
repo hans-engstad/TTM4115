@@ -13,24 +13,27 @@ class MQTT():
         self._buffer.append(message)
     
     def simulate_recieve_buffer(self):
-        # Simulate that entire buffer is recieved by client, one package at a time
-        chunk_count = 10  # Number of chunks to play at a time from the buffer
+        # Simulate that entire buffer is recieved by the client, five packages at a time
+        # Running one package at a time, causes interruption in audio playback
+
+        chunk_count = 5  # Number of chunks to play at a time from the buffer
         while(len(self._buffer) > 0):
-            data = []
-            buffer_index = 9
+            buffer_index = chunk_count - 1
             if len(self._buffer) < buffer_index:
                 buffer_index = len(self._buffer) - 1
-            
-            print("Buffer length: ", len(self._buffer))
-            print("Buffer index: ", buffer_index)
 
+            # Extract data-array we want to send
             data = self._buffer[0:buffer_index]
+
+            # Join the data-array so it is one continous string of bytes
             raw_data = b''.join(data)
-            
+
+            # Simulate that we are recieving this raw data
             self.recieve(raw_data)
-            self._buffer = self._buffer[buffer_index+1:]
-        # self.recieve(b''.join(self._buffer))
-        self._buffer = []
+
+            # Remove the data we just sent from the buffer
+            self._buffer = self._buffer[buffer_index + 1:]
+                
 
     def recieve(self, message):
-        self.player.state_machine.send("play", args=[message])
+        self.player.play(message)

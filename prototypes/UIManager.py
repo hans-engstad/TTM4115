@@ -1,13 +1,14 @@
 from tkinter import *
 from stmpy import Driver
-from ClientMachine import ClientMachine
+from AudioPlayer import AudioPlayer
+from AudioRecorder import AudioRecorder
 from pyaudio import PyAudio
 import sys
 
 class UIManager():
 
-    def __init__(self, client_machine : ClientMachine, driver : Driver, py_audio : PyAudio):
-        self.client_machine = client_machine
+    def __init__(self, recorder : AudioRecorder, driver : Driver, py_audio : PyAudio):
+        self.recorder = recorder
         self.driver = driver
         self.py_audio = py_audio
         self.setup()
@@ -21,8 +22,8 @@ class UIManager():
         self.root.geometry('200x200')
         
         # Create a Button
-        start_btn = Button(self.root, text = 'Start', bd = '5', command = self.on_start)
-        stop_btn = Button(self.root, text = 'Stop', bd = '5', command = self.on_stop)
+        start_btn = Button(self.root, text = 'Start', bd = '5', command = self.recorder.start_recording)
+        stop_btn = Button(self.root, text = 'Stop', bd = '5', command = self.recorder.stop_recording)
 
         queue_1_btn = Button(self.root, text = 'Exit', bd = '5', command = self.exit).pack()
         
@@ -32,11 +33,6 @@ class UIManager():
         
         # Start main loop of tkinter window
         self.root.mainloop()
-    
-    def on_start(self):
-        self.client_machine.state_machine.send("start")
-    def on_stop(self):
-        self.client_machine.state_machine.send("stop")
     
     def exit(self):
         self.root.destroy()

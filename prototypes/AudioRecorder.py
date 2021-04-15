@@ -1,30 +1,49 @@
+from pyaudio import PyAudio
 import pyaudio
 import wave
+from MQTT import MQTT
+from stmpy import Driver, Machine
 
 class AudioRecorder:
-    def __init__(self, mqtt):
-        self.recording = False
-        self.fs = 44100  # Record at 44100 samples per second
-        self.chunk = 1024  # Record in chunks of 1024 samples
-        self.sample_format = pyaudio.paInt16  # 16 bits per sample
-        self.channels = 2
-        self.filename = "output.wav"
+    def __init__(self, 
+        mqtt : MQTT, 
+        driver : Driver, 
+        py_audio : PyAudio
+    ):
+        # Define private variables
+        self._recording = False
 
+        # Save references
         self.mqtt = mqtt
-        
-    def record(self):
-        p = pyaudio.PyAudio()
+        self.py_audio = py_audio
 
-        stream = p.open(format=self.sample_format,
-                channels=self.channels,
-                rate=self.fs,
-                frames_per_buffer=self.chunk,
+        # Create state machine
+        self.state_machine = Machine(
+            name="audio_recorder", 
+            transitions=self._get_transitions(), 
+            states=self._get_states(), 
+            obj=self
+        )
+        driver.add_machine(self.state_machine)
+    
+    # Private methods
+
+    def _record(self):
+        fs = 44100  # Record at 44100 samples per second
+        chunk = 1024  # Record in chunks of 1024 samples
+        sample_format = pyaudio.paInt16  # 16 bits per sample
+        channels = 2
+
+        stream = self.py_audio.open(format=sample_format,
+                channels=channels,
+                rate=fs,
+                frames_per_buffer=chunk,
                 input=True)
         
-        self.recording = True
+        self._recording = True
         print("Recording audio")
-        while self.recording:
-            data = stream.read(self.chunk)
+        while self._recording:
+            data = stream.read(chunk)
             self.mqtt.publish("insert_topic_here", data)
         
         print("Done recording audio")
@@ -35,8 +54,24 @@ class AudioRecorder:
         # Stop and close the stream 
         stream.stop_stream()
         stream.close()
-        # Terminate the PortAudio interface
-        p.terminate()
-        
-    def stop(self):
-        self.recording = False
+
+    def _get_states(self):
+        return [
+            {'name': 'ready'},
+            {'name': 'recording', 'do': '_record()', "stop": "stop_recording()"},
+        ]
+    
+    def _get_transitions(self):
+        return [
+            {'source': 'initial', 'target': 'ready'},
+            {'trigger': 'start_recording', 'source': 'ready', 'target': 'recording'},
+            {'trigger': 'done', 'source': 'recording', 'target': 'ready'},
+        ]
+
+    # Public methods
+    
+    def stop_recording(self):
+        self._recording = False
+
+    def start_recording(self):
+        self.state_machine.send("start_recording")
