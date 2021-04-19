@@ -1,7 +1,7 @@
 from pyaudio import PyAudio
 import pyaudio
 import wave
-from mqtt import MQTT
+from MQTT import MQTT
 from stmpy import Driver, Machine
 
 

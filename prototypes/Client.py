@@ -3,7 +3,7 @@ import pyaudio
 from AudioRecorder import AudioRecorder
 from UIManager import UIManager
 from AudioPlayer import AudioPlayer
-from mqtt import MQTT
+from MQTT import MQTT
 
 
 # Instantiate third-party dependencies
