@@ -3,17 +3,18 @@ import pyaudio
 from pyaudio import PyAudio
 from stmpy import Machine, Driver
 
+
 class AudioPlayer():
 
-    def __init__(self, 
-        driver : Driver, 
-        py_audio : PyAudio
-    ):
+    def __init__(self,
+                 driver: Driver,
+                 py_audio: PyAudio
+                 ):
         self.py_audio = py_audio
         self.state_machine = Machine(
-            name="audio_machine", 
-            transitions=self._get_transitions(), 
-            states=self._get_states(), 
+            name="audio_machine",
+            transitions=self._get_transitions(),
+            states=self._get_states(),
             obj=self
         )
         driver.add_machine(self.state_machine)
@@ -23,17 +24,22 @@ class AudioPlayer():
     def _get_transitions(self):
         return [
             {'source': 'initial', 'target': 'ready'},
-            {'trigger': 'play', 'source': 'ready', 'target': 'playing', 'effect': self._start_player.__name__},
-            {'trigger': 'done', 'source': 'playing', 'target': 'waiting_for_next_chunk'},
-            {'trigger': 't', 'source': 'waiting_for_next_chunk', 'target': 'ready', 'effect': self._stop_player.__name__},
-            {'trigger': 'play', 'source': 'waiting_for_next_chunk', 'target': 'playing', 'effect': 'stop_timer("t")'},
+            {'trigger': 'play', 'source': 'ready', 'target': 'playing',
+                'effect': self._start_player.__name__},
+            {'trigger': 'done', 'source': 'playing',
+                'target': 'waiting_for_next_chunk'},
+            {'trigger': 't', 'source': 'waiting_for_next_chunk',
+                'target': 'ready', 'effect': self._stop_player.__name__},
+            {'trigger': 'play', 'source': 'waiting_for_next_chunk',
+                'target': 'playing', 'effect': 'stop_timer("t")'},
         ]
-    
+
     def _get_states(self):
         return [
             {'name': 'ready'},
             {'name': 'playing', 'do': '_play(*)', 'play': 'defer'},
-            {'name': 'waiting_for_next_chunk', 'entry': 'start_timer("t", 1000)'},
+            {'name': 'waiting_for_next_chunk',
+                'entry': 'start_timer("t", 1000)'},
         ]
 
     def _play(self, data):
@@ -72,4 +78,3 @@ class AudioPlayer():
         will be queued and played at a later point using defer. 
         """
         self.state_machine.send("play", args=[data])
-        

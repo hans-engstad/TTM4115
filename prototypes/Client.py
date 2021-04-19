@@ -3,7 +3,7 @@ import pyaudio
 from AudioRecorder import AudioRecorder
 from UIManager import UIManager
 from AudioPlayer import AudioPlayer
-from MQTT import MQTT
+from mqtt import MQTT
 
 
 # Instantiate third-party dependencies
@@ -15,11 +15,10 @@ player = AudioPlayer(driver, py_audio)
 mqtt = MQTT(player)
 recorder = AudioRecorder(mqtt, driver, py_audio)
 
-# Start state machine driver, state machines should have already been 
-# registered through dependency injection (Passed reference to driver 
+# Start state machine driver, state machines should have already been
+# registered through dependency injection (Passed reference to driver
 # into each state machine wrappers)
 driver.start()
 
 # Instantiate UIManager, which will render ui in a new window
 ui_manager = UIManager(recorder, driver, py_audio)
-

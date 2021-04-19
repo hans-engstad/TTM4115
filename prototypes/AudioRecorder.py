@@ -1,15 +1,16 @@
 from pyaudio import PyAudio
 import pyaudio
 import wave
-from MQTT import MQTT
+from mqtt import MQTT
 from stmpy import Driver, Machine
 
+
 class AudioRecorder:
-    def __init__(self, 
-        mqtt : MQTT, 
-        driver : Driver, 
-        py_audio : PyAudio
-    ):
+    def __init__(self,
+                 mqtt: MQTT,
+                 driver: Driver,
+                 py_audio: PyAudio
+                 ):
         # Define private variables
         self._recording = False
 
@@ -19,13 +20,13 @@ class AudioRecorder:
 
         # Create state machine
         self.state_machine = Machine(
-            name="audio_recorder", 
-            transitions=self._get_transitions(), 
-            states=self._get_states(), 
+            name="audio_recorder",
+            transitions=self._get_transitions(),
+            states=self._get_states(),
             obj=self
         )
         driver.add_machine(self.state_machine)
-    
+
     # Private methods
 
     def _record(self):
@@ -35,23 +36,23 @@ class AudioRecorder:
         channels = 2
 
         stream = self.py_audio.open(format=sample_format,
-                channels=channels,
-                rate=fs,
-                frames_per_buffer=chunk,
-                input=True)
-        
+                                    channels=channels,
+                                    rate=fs,
+                                    frames_per_buffer=chunk,
+                                    input=True)
+
         self._recording = True
         print("Recording audio")
         while self._recording:
             data = stream.read(chunk)
-            self.mqtt.publish("insert_topic_here", data)
-        
+            self.mqtt.publish("ttm4115/team_09/answer", data)
+
         print("Done recording audio")
 
         # Simulate that all packages are now recieved
-        self.mqtt.simulate_recieve_buffer()
+        # self.mqtt.simulate_recieve_buffer()
 
-        # Stop and close the stream 
+        # Stop and close the stream
         stream.stop_stream()
         stream.close()
 
@@ -60,7 +61,7 @@ class AudioRecorder:
             {'name': 'ready'},
             {'name': 'recording', 'do': '_record()', "stop": "stop_recording()"},
         ]
-    
+
     def _get_transitions(self):
         return [
             {'source': 'initial', 'target': 'ready'},
@@ -69,7 +70,7 @@ class AudioRecorder:
         ]
 
     # Public methods
-    
+
     def stop_recording(self):
         self._recording = False
 
