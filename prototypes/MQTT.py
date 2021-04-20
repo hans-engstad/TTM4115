@@ -1,9 +1,9 @@
-# TODO: Mathias
-
 import paho.mqtt.client as mqtt
 import logging
 from AudioPlayer import AudioPlayer
 from ChannelManager import ChannelManager
+import json
+import base64
 
 debug_level = logging.DEBUG
 logger = logging.getLogger(__name__)
@@ -26,7 +26,7 @@ MQTT_TOPIC_OUTPUT = 'ttm4115/team_09/answer'
 
 class MQTT():
 
-    def __init__(self, player : AudioPlayer, channel_manager : ChannelManager):
+    def __init__(self, player: AudioPlayer, channel_manager: ChannelManager):
         self._buffer = []
         self.player = player
         self.channel_manager = channel_manager
@@ -63,7 +63,12 @@ class MQTT():
         self.mqtt_client.publish(topic, message)
 
     def recieve(self, message):
-        self.player.play(message)
+        decodedPacket = json.loads(message)
+        decodedPayload = base64.b64decode(decodedPacket['payload'])
+        print(decodedPacket['senderID'])
+
+        # if unformattedPacket['senderID'] != "signe":
+        self.player.play(decodedPayload)
 
     """
     def simulate_recieve_buffer(self):

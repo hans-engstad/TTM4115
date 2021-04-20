@@ -3,6 +3,8 @@ import pyaudio
 import wave
 from MQTT import MQTT
 from stmpy import Driver, Machine
+import json
+import base64
 
 
 class AudioRecorder:
@@ -43,10 +45,18 @@ class AudioRecorder:
 
         self._recording = True
         print("Recording audio")
-        data = []
         while self._recording:
-            data = stream.read(chunk)
-            self.mqtt.publish("ttm4115/team_09/answer", data)
+            payload = stream.read(chunk)
+            encodedPayload = base64.b64encode(payload).decode('ascii')
+            senderID = "andreas"
+
+            packet = {
+                "senderID": senderID,
+                "payload": encodedPayload
+            }
+
+            encodedPacket = json.dumps(packet)
+            self.mqtt.publish("ttm4115/team_09/answer", encodedPacket)
 
         print("Done recording audio")
 
