@@ -22,4 +22,4 @@ recorder = AudioRecorder(mqtt, driver, py_audio)
 driver.start()
 
 # Instantiate UIManager, which will render ui in a new window
-ui_manager = UIManager(recorder, driver, py_audio, channel_manager)
+ui_manager = UIManager(recorder, driver, py_audio, channel_manager, mqtt)

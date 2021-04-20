@@ -31,7 +31,7 @@ class AudioRecorder:
 
     # Private methods
 
-    def _record(self):
+    def _record(self, channel):
         fs = 44100  # Record at 44100 samples per second
         chunk = 1024  # Record in chunks of 1024 samples
         sample_format = pyaudio.paInt16  # 16 bits per sample
@@ -60,8 +60,6 @@ class AudioRecorder:
 
         print("Done recording audio")
 
-        # Simulate that all packages are now recieved
-
         # Stop and close the stream
         stream.stop_stream()
         stream.close()
@@ -69,7 +67,8 @@ class AudioRecorder:
     def _get_states(self):
         return [
             {'name': 'ready'},
-            {'name': 'recording', 'do': '_record()', "stop": "stop_recording()"},
+            {'name': 'recording',
+                'do': '_record(*)', "stop": "stop_recording()"},
         ]
 
     def _get_transitions(self):
@@ -84,5 +83,5 @@ class AudioRecorder:
     def stop_recording(self):
         self._recording = False
 
-    def start_recording(self):
-        self.state_machine.send("start_recording")
+    def start_recording(self, channel):
+        self.state_machine.send("start_recording", args=[channel])
