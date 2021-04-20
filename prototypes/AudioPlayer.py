@@ -1,15 +1,12 @@
-# TODO: Signe
 import pyaudio
 from pyaudio import PyAudio
 from stmpy import Machine, Driver
+import logging
 
 
 class AudioPlayer():
-
-    def __init__(self,
-                 driver: Driver,
-                 py_audio: PyAudio
-                 ):
+    def __init__(self, driver: Driver, py_audio: PyAudio):
+        self.logger = logging.getLogger("WalkieTalkie")
         self.py_audio = py_audio
         self.state_machine = Machine(
             name="audio_machine",
@@ -18,8 +15,6 @@ class AudioPlayer():
             obj=self
         )
         driver.add_machine(self.state_machine)
-
-    # Private methods
 
     def _get_transitions(self):
         return [
@@ -43,17 +38,10 @@ class AudioPlayer():
         ]
 
     def _play(self, data):
-        """
-        Play given data
-        """
-        # Write to audio stream to play sound
         self.audio_stream.write(data)
 
     def _start_player(self):
-        """
-        Open stream that is used to play audio
-        """
-        print("Starting player")
+        self.logger.info("Audio player initiated")
         self.audio_stream = self.py_audio.open(
             format=pyaudio.paInt16,
             channels=2,
@@ -62,18 +50,13 @@ class AudioPlayer():
         )
 
     def _stop_player(self):
-        """
-        Close the stream used to play audio. 
-        """
-        print("Stopping player")
+        self.logger.info("Audio player stopped")
         self.audio_stream.stop_stream()
         self.audio_stream.close()
 
-    # Public methods
-
     def play(self, data):
         """
-        Play given audio data by sending it to the state machine. \n
+        Play given audio data by sending it to the state machine. 
         If the player is already playing something else, the data 
         will be queued and played at a later point using defer. 
         """

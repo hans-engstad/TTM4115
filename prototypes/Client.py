@@ -5,6 +5,10 @@ from UIManager import UIManager
 from AudioPlayer import AudioPlayer
 from MQTT import MQTT
 from ChannelManager import ChannelManager
+from logger import init_logger
+
+# Configure module wide logger
+init_logger()
 
 # Instantiate third-party dependencies
 py_audio = pyaudio.PyAudio()

@@ -6,16 +6,12 @@ from stmpy import Driver, Machine
 import json
 import base64
 import ChannelManager
+import logging
 
 
 class AudioRecorder:
-    def __init__(self,
-                 mqtt: MQTT,
-                 driver: Driver,
-                 py_audio: PyAudio,
-                 channel_manager: ChannelManager
-                 ):
-
+    def __init__(self, mqtt: MQTT, driver: Driver, py_audio: PyAudio, channel_manager: ChannelManager):
+        self.logger = logging.getLogger("WalkieTalkie")
         self.channel_manager = channel_manager
 
         # Define private variables
@@ -34,22 +30,17 @@ class AudioRecorder:
         )
         driver.add_machine(self.state_machine)
 
-    # Private methods
-
     def _record(self, channel):
         fs = 44100  # Record at 44100 samples per second
         chunk = 1024  # Record in chunks of 1024 samples
         sample_format = pyaudio.paInt16  # 16 bits per sample
         channels = 2
 
-        stream = self.py_audio.open(format=sample_format,
-                                    channels=channels,
-                                    rate=fs,
-                                    frames_per_buffer=chunk,
-                                    input=True)
+        stream = self.py_audio.open(
+            format=sample_format, channels=channels, rate=fs, frames_per_buffer=chunk, input=True)
 
         self._recording = True
-        print("Recording audio")
+        self.logger.info(f'Audio recording started for channel {channel}')
         while self._recording:
             payload = stream.read(chunk)
             encodedPayload = base64.b64encode(payload).decode('ascii')
@@ -63,7 +54,7 @@ class AudioRecorder:
             encodedPacket = json.dumps(packet)
             self.mqtt.publish("ttm4115/team_09/answer", encodedPacket)
 
-        print("Done recording audio")
+        self.logger.info(f"Audio recording stopped for channel {channel}")
 
         # Stop and close the stream
         stream.stop_stream()
@@ -82,8 +73,6 @@ class AudioRecorder:
             {'trigger': 'start_recording', 'source': 'ready', 'target': 'recording'},
             {'trigger': 'done', 'source': 'recording', 'target': 'ready'},
         ]
-
-    # Public methods
 
     def stop_recording(self):
         self._recording = False

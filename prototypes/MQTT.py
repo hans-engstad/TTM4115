@@ -4,16 +4,8 @@ from AudioPlayer import AudioPlayer
 from ChannelManager import ChannelManager
 import json
 import base64
+import logging
 
-debug_level = logging.DEBUG
-logger = logging.getLogger(__name__)
-logger.setLevel(debug_level)
-ch = logging.StreamHandler()
-ch.setLevel(debug_level)
-formatter = logging.Formatter(
-    '%(asctime)s - %(name)-12s - %(levelname)-8s - %(message)s')
-ch.setFormatter(formatter)
-logger.addHandler(ch)
 
 # MQTT broker address
 MQTT_BROKER = 'mqtt.item.ntnu.no'
@@ -27,14 +19,14 @@ MQTT_TOPIC_OUTPUT = 'ttm4115/team_09/answer'
 class MQTT():
 
     def __init__(self, player: AudioPlayer, channel_manager: ChannelManager):
+        self.logger = logging.getLogger("WalkieTalkie")
         self._buffer = []
         self.player = player
         self.channel_manager = channel_manager
 
         # create client
-        self._logger = logging.getLogger(__name__)
-        self._logger.debug(
-            'Connecting to MQTT broker {} at port {}'.format(MQTT_BROKER, MQTT_PORT))
+        self.logger.info(
+            f'Connecting to MQTT broker {MQTT_BROKER} at port {MQTT_PORT}')
         self.mqtt_client = mqtt.Client()
         # callback methods
         self.mqtt_client.on_connect = self.on_connect
@@ -50,11 +42,11 @@ class MQTT():
 
     def on_connect(self, client, userdata, flags, rc):
         # we just log that we are connected
-        self._logger.debug('MQTT connected to {}'.format(client))
+        self.logger.info(f'Successfully connected to MQTT broker')
 
     def on_message(self, client, userdata, msg):
-        self._logger.debug('Incoming message to topic {}'.format(msg.topic))
-        self.recieve(msg.payload)
+        self.logger.debug(f'Incoming message to topic {msg.topic}')
+        self.receive(msg.payload)
 
     def subscribe(self, topic):
         self.mqtt_client.subscribe(topic)
@@ -73,10 +65,9 @@ class MQTT():
     def publish(self, topic, message):
         self.mqtt_client.publish(topic, message)
 
-    def recieve(self, message):
+    def receive(self, message):
         decodedPacket = json.loads(message)
         decodedPayload = base64.b64decode(decodedPacket['payload'])
-        # print(decodedPacket['senderID'])
 
         if decodedPacket['senderID'] != self.channel_manager.getUserID():
             self.player.play(decodedPayload)
