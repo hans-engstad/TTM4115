@@ -5,14 +5,19 @@ from MQTT import MQTT
 from stmpy import Driver, Machine
 import json
 import base64
+import ChannelManager
 
 
 class AudioRecorder:
     def __init__(self,
                  mqtt: MQTT,
                  driver: Driver,
-                 py_audio: PyAudio
+                 py_audio: PyAudio,
+                 channel_manager: ChannelManager
                  ):
+
+        self.channel_manager = channel_manager
+
         # Define private variables
         self._recording = False
 
@@ -48,7 +53,7 @@ class AudioRecorder:
         while self._recording:
             payload = stream.read(chunk)
             encodedPayload = base64.b64encode(payload).decode('ascii')
-            senderID = "andreas"
+            senderID = self.channel_manager.getUserID()
 
             packet = {
                 "senderID": senderID,

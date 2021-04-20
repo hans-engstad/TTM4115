@@ -14,7 +14,7 @@ driver = Driver()   # STMPY driver that will run all state machines
 channel_manager = ChannelManager()
 player = AudioPlayer(driver, py_audio)
 mqtt = MQTT(player, channel_manager)
-recorder = AudioRecorder(mqtt, driver, py_audio)
+recorder = AudioRecorder(mqtt, driver, py_audio, channel_manager)
 
 # Start state machine driver, state machines should have already been
 # registered through dependency injection (Passed reference to driver

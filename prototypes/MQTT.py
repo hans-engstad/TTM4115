@@ -46,7 +46,6 @@ class MQTT():
         # start the internal loop to process MQTT messages
         self.mqtt_client.loop_start()
 
-
         self.update_subscriptions()
 
     def on_connect(self, client, userdata, flags, rc):
@@ -77,8 +76,7 @@ class MQTT():
     def recieve(self, message):
         decodedPacket = json.loads(message)
         decodedPayload = base64.b64decode(decodedPacket['payload'])
-        print(decodedPacket['senderID'])
+        # print(decodedPacket['senderID'])
 
-        # if unformattedPacket['senderID'] != "signe":
-        self.player.play(decodedPayload)
-
+        if decodedPacket['senderID'] != self.channel_manager.getUserID():
+            self.player.play(decodedPayload)
