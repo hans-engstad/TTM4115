@@ -4,6 +4,7 @@ from AudioPlayer import AudioPlayer
 from AudioRecorder import AudioRecorder
 from pyaudio import PyAudio
 from ChannelManager import ChannelManager
+from MQTT import MQTT
 import sys
 
 class Page(tk.Frame):
@@ -41,8 +42,8 @@ class StartPage(Page):
         frame.pack(side="top", fill="both", expand=True)
 
     def start_recording(self, channel):
-        self.ui_manager.recorder.start_recording()
         print("Start recording for channel: " + channel)
+        self.ui_manager.recorder.start_recording(channel)
 
     def stop_recording(self, channel):
         print("Stop recording for channel: " + channel)
@@ -52,6 +53,7 @@ class StartPage(Page):
         channel = input.get()
         print("Join channel: " + channel)
         self.ui_manager.channel_manager.add_channel(channel)
+        self.ui_manager.mqtt.update_subscriptions()
         self.display_channel(channel)
 
     
@@ -75,12 +77,14 @@ class UIManager():
         recorder : AudioRecorder, 
         driver : Driver, 
         py_audio : PyAudio, 
-        channel_manager : ChannelManager
+        channel_manager : ChannelManager,
+        mqtt : MQTT
     ):
         self.recorder = recorder
         self.driver = driver
         self.py_audio = py_audio
         self.channel_manager = channel_manager
+        self.mqtt = mqtt
         self.setup()
 
     def setup(self):
