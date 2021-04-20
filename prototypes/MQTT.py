@@ -5,6 +5,9 @@ from ChannelManager import ChannelManager
 import json
 import base64
 import logging
+from AudioPlayer import AudioPlayer
+from stmpy import Driver
+from pyaudio import PyAudio
 
 
 # MQTT broker address
@@ -18,11 +21,12 @@ MQTT_TOPIC_OUTPUT = 'ttm4115/team_09/answer'
 
 class MQTT():
 
-    def __init__(self, player: AudioPlayer, channel_manager: ChannelManager):
+    def __init__(self, driver: Driver, channel_manager: ChannelManager, py_audio: PyAudio):
         self.logger = logging.getLogger("WalkieTalkie")
-        self._buffer = []
-        self.player = player
+        self.players = {}
         self.channel_manager = channel_manager
+        self.driver = driver
+        self.py_audio = py_audio
 
         # create client
         self.logger.info(
@@ -39,6 +43,9 @@ class MQTT():
         self.mqtt_client.loop_start()
 
         self.update_subscriptions()
+
+    def getNewPlayer(self):
+        return AudioPlayer(self.driver, self.py_audio)
 
     def on_connect(self, client, userdata, flags, rc):
         # we just log that we are connected
@@ -68,6 +75,11 @@ class MQTT():
     def receive(self, message):
         decodedPacket = json.loads(message)
         decodedPayload = base64.b64decode(decodedPacket['payload'])
+        senderID = decodedPacket['senderID']
 
-        if decodedPacket['senderID'] != self.channel_manager.getUserID():
-            self.player.play(decodedPayload)
+        if senderID != self.channel_manager.getUserID():
+            if senderID not in self.players:
+                newPlayer = self.getNewPlayer()
+                self.players[senderID] = newPlayer
+
+            self.players[senderID].play(decodedPayload)

@@ -2,7 +2,6 @@ from stmpy import Driver
 import pyaudio
 from AudioRecorder import AudioRecorder
 from UIManager import UIManager
-from AudioPlayer import AudioPlayer
 from MQTT import MQTT
 from ChannelManager import ChannelManager
 from logger import init_logger
@@ -16,8 +15,7 @@ driver = Driver()   # STMPY driver that will run all state machines
 
 # Instantiate our classes
 channel_manager = ChannelManager()
-player = AudioPlayer(driver, py_audio)
-mqtt = MQTT(player, channel_manager)
+mqtt = MQTT(driver, channel_manager, py_audio)
 recorder = AudioRecorder(mqtt, driver, py_audio, channel_manager)
 
 # Start state machine driver, state machines should have already been
