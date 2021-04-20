@@ -2,6 +2,8 @@
 
 import paho.mqtt.client as mqtt
 import logging
+from AudioPlayer import AudioPlayer
+from ChannelManager import ChannelManager
 
 debug_level = logging.DEBUG
 logger = logging.getLogger(__name__)
@@ -24,9 +26,10 @@ MQTT_TOPIC_OUTPUT = 'ttm4115/team_09/answer'
 
 class MQTT():
 
-    def __init__(self, player):
+    def __init__(self, player : AudioPlayer, channel_manager : ChannelManager):
         self._buffer = []
         self.player = player
+        self.channel_manager = channel_manager
 
         # create client
         self._logger = logging.getLogger(__name__)

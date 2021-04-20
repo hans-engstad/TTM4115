@@ -43,6 +43,7 @@ class AudioRecorder:
 
         self._recording = True
         print("Recording audio")
+        data = []
         while self._recording:
             data = stream.read(chunk)
             self.mqtt.publish("ttm4115/team_09/answer", data)
@@ -50,7 +51,6 @@ class AudioRecorder:
         print("Done recording audio")
 
         # Simulate that all packages are now recieved
-        # self.mqtt.simulate_recieve_buffer()
 
         # Stop and close the stream
         stream.stop_stream()
