@@ -21,8 +21,17 @@ class ChannelManager():
     def getUserID(self):
         return self.userID
 
+    def getAvailableChannels(self):
+        # fake API call
+        return [ 
+            "ttm4115/team_09/channel1",
+            "ttm4115/team_09/channel2",
+            "ttm4115/team_09/emergency"
+        ]
+
+
     def getChannelPriority(self,channel):
-        # API call
+        # fake API call
         priorities = {
             "ttm4115/team_09/channel1":1,
             "ttm4115/team_09/emergency":3

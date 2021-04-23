@@ -28,10 +28,16 @@ class StartPage(Page):
             join_channel_input)).pack()
         tk.Button(self, text="Exit", command=ui_manager.exit).pack()
 
-        label = tk.Label(self, text="Your channels")
-        label.config(font=("Courier", 44))
+        label1 = tk.Label(self, text="Available channels")
+        label1.config(font=("Courier", 24))
+        label1.pack(side="top", fill="both", expand=True)
+        for channel in self.ui_manager.channel_manager.getAvailableChannels():
+            channel1 = tk.Label(self, text=channel)
+            channel1.pack(side="top", fill="both", expand=True)
 
-        label.pack(side="top", fill="both", expand=True)
+        label2 = tk.Label(self, text="Your channels")
+        label2.config(font=("Courier", 24))
+        label2.pack(side="top", fill="both", expand=True)
 
         for channel in self.ui_manager.channel_manager.get_channels():
             self.display_channel(channel)
