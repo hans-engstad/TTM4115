@@ -23,7 +23,7 @@ class MQTT():
 
     def __init__(self, driver: Driver, channel_manager: ChannelManager, py_audio: PyAudio):
         self.logger = logging.getLogger("WalkieTalkie")
-        self.players = {}
+        self.players = {}  # userID -> audio player object
         self.channel_manager = channel_manager
         self.driver = driver
         self.py_audio = py_audio
