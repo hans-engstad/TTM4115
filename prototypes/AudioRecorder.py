@@ -52,7 +52,7 @@ class AudioRecorder:
             }
 
             encodedPacket = json.dumps(packet)
-            self.mqtt.publish("ttm4115/team_09/answer", encodedPacket)
+            self.mqtt.publish(channel, encodedPacket)
 
         self.logger.info(f"Audio recording stopped for channel {channel}")
 
