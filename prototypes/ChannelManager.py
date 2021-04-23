@@ -5,7 +5,7 @@ import logging
 class ChannelManager():
     def __init__(self):
         self.logger = logging.getLogger("WalkieTalkie")
-        self._channels = ["ttm4115/team_09/answer"]
+        self._channels = ["ttm4115/team_09/emergency"]
         self.userID = uuid.uuid1().hex
 
     def get_channels(self):
@@ -17,3 +17,15 @@ class ChannelManager():
 
     def getUserID(self):
         return self.userID
+
+    def getChannelPriority(self,channel):
+        # API call
+        priorities = {
+            "ttm4115/team_09/channel1":1,
+            "ttm4115/team_09/emergency":3
+        }
+
+        if channel in priorities:
+            return priorities[channel]
+    
+        return 1

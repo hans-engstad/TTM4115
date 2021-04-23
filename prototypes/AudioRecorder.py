@@ -7,6 +7,7 @@ import json
 import base64
 import ChannelManager
 import logging
+from packet import Packet
 
 
 class AudioRecorder:
@@ -42,21 +43,14 @@ class AudioRecorder:
         self._recording = True
         self.logger.info(f'Audio recording started for channel {channel}')
         while self._recording:
-            payload = stream.read(chunk)
-            encodedPayload = base64.b64encode(payload).decode('ascii')
             senderID = self.channel_manager.getUserID()
-
-            packet = {
-                "senderID": senderID,
-                "payload": encodedPayload
-            }
-
-            encodedPacket = json.dumps(packet)
-            self.mqtt.publish(channel, encodedPacket)
+            priority = self.channel_manager.getChannelPriority(channel)
+            message = stream.read(chunk)
+            encodedMessage = base64.b64encode(message).decode('ascii')
+            packet = Packet(priority, channel, senderID, encodedMessage)
+            self.mqtt.publish(packet)
 
         self.logger.info(f"Audio recording stopped for channel {channel}")
-
-        # Stop and close the stream
         stream.stop_stream()
         stream.close()
 

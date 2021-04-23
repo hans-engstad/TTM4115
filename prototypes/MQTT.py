@@ -3,12 +3,11 @@ import logging
 from AudioPlayer import AudioPlayer
 from ChannelManager import ChannelManager
 import json
-import base64
 import logging
 from AudioPlayer import AudioPlayer
-from stmpy import Driver
+from stmpy import Machine, Driver
 from pyaudio import PyAudio
-
+from packet import Packet
 
 # MQTT broker address
 MQTT_BROKER = 'mqtt.item.ntnu.no'
@@ -27,22 +26,69 @@ class MQTT():
         self.channel_manager = channel_manager
         self.driver = driver
         self.py_audio = py_audio
-
+        self.queue = []
+        self.max_current_priority = -1
+ 
         # create client
         self.logger.info(
             f'Connecting to MQTT broker {MQTT_BROKER} at port {MQTT_PORT}')
         self.mqtt_client = mqtt.Client()
-        # callback methods
         self.mqtt_client.on_connect = self.on_connect
         self.mqtt_client.on_message = self.on_message
-        # Connect to the broker
         self.mqtt_client.connect(MQTT_BROKER, MQTT_PORT)
-        # subscribe to proper topic(s) of your choice
-        self.mqtt_client.subscribe(MQTT_TOPIC_INPUT)
-        # start the internal loop to process MQTT messages
         self.mqtt_client.loop_start()
+        self.update_subscriptions() 
 
-        self.update_subscriptions()
+        
+        # Create state machine
+        self.state_machine = Machine(
+            name="mqtt",
+            transitions=self._get_transitions(),
+            states=self._get_states(),
+            obj=self
+        )
+        driver.add_machine(self.state_machine)
+
+    def _get_states(self):
+        return [
+            {'name': 'ready'},
+            {'name': 'prioritising',
+                'do': 'remove_low_priority_items()', 
+                'receive': 'defer'
+            },
+            {'name':'sending',
+                'do':'send_queue_to_player()',
+                'receive': 'defer'
+            }
+        ]
+
+    def _get_transitions(self):
+        return [
+            {'source': 'initial', 'target': 'ready','effect':'start_timer("t",1000)'},
+            {'trigger': 'receive', 'source': 'ready', 'target': 'ready', 'effect':'add_to_queue(*)'},
+            {'trigger': 't', 'source': 'ready', 'target': 'prioritising'},
+            {'trigger':'done','source':'prioritising','target':'sending'},
+            {'trigger':'done','source':'sending','target':'ready','effect':'start_timer("t",1000)'},
+        ]
+
+    def add_to_queue(self, packet : Packet):
+        self.max_current_priority = max(self.max_current_priority, packet.priority)
+        self.queue.append(packet)
+       
+    def remove_low_priority_items(self):
+        for packet in self.queue:
+            if packet.priority < self.max_current_priority:
+                self.queue.remove(packet)
+
+    def send_queue_to_player(self):
+        for packet in self.queue:
+            if packet.senderID != self.channel_manager.getUserID():
+                if packet.senderID not in self.players:
+                    newPlayer = self.getNewPlayer()
+                    self.players[packet.senderID] = newPlayer
+
+                decoded_message = packet.get_decoded_message()
+                self.players[packet.senderID].play(decoded_message)
 
     def getNewPlayer(self):
         return AudioPlayer(self.driver, self.py_audio)
@@ -52,8 +98,9 @@ class MQTT():
         self.logger.info(f'Successfully connected to MQTT broker')
 
     def on_message(self, client, userdata, msg):
-        self.logger.debug(f'Incoming message to topic {msg.topic}')
-        self.receive(msg.payload)
+        packet = Packet.deserialize(msg)
+        self.state_machine.send('receive',args=[packet])
+        self.logger.debug(f'Incoming message to topic {packet.channel}')
 
     def subscribe(self, topic):
         self.mqtt_client.subscribe(topic)
@@ -69,17 +116,6 @@ class MQTT():
         for channel in self.channel_manager.get_channels():
             self.mqtt_client.subscribe(channel)
 
-    def publish(self, topic, message):
-        self.mqtt_client.publish(topic, message)
-
-    def receive(self, message):
-        decodedPacket = json.loads(message)
-        decodedPayload = base64.b64decode(decodedPacket['payload'])
-        senderID = decodedPacket['senderID']
-
-        if senderID != self.channel_manager.getUserID():
-            if senderID not in self.players:
-                newPlayer = self.getNewPlayer()
-                self.players[senderID] = newPlayer
-
-            self.players[senderID].play(decodedPayload)
+    def publish(self, packet):
+        serializedMessage = packet.serialize()
+        self.mqtt_client.publish(packet.channel, serializedMessage)

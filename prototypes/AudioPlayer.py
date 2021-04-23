@@ -9,7 +9,7 @@ class AudioPlayer():
         self.logger = logging.getLogger("WalkieTalkie")
         self.py_audio = py_audio
         self.state_machine = Machine(
-            name="audio_machine",
+            name="audio_machine"+id(self),
             transitions=self._get_transitions(),
             states=self._get_states(),
             obj=self
@@ -54,10 +54,10 @@ class AudioPlayer():
         self.audio_stream.stop_stream()
         self.audio_stream.close()
 
-    def play(self, data):
+    def play(self, decoded_message):
         """
         Play given audio data by sending it to the state machine. 
         If the player is already playing something else, the data 
         will be queued and played at a later point using defer. 
         """
-        self.state_machine.send("play", args=[data])
+        self.state_machine.send("play", args=[decoded_message])
