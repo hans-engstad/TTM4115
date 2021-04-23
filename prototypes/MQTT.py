@@ -98,7 +98,7 @@ class MQTT():
         self.logger.info(f'Successfully connected to MQTT broker')
 
     def on_message(self, client, userdata, msg):
-        packet = Packet.deserialize(msg)
+        packet = Packet.deserialize(msg.payload)
         self.state_machine.send('receive',args=[packet])
         self.logger.debug(f'Incoming message to topic {packet.channel}')
 
