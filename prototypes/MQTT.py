@@ -56,11 +56,11 @@ class MQTT():
 
     def _get_transitions(self):
         return [
-            {'source': 'initial', 'target': 'ready','effect':'start_timer("t",100)'},
+            {'source': 'initial', 'target': 'ready','effect':'start_timer("t",300)'},
             {'trigger': 'receive', 'source': 'ready', 'target': 'ready', 'effect':'add_to_queue(*)'},
             {'trigger': 't', 'source': 'ready', 'target': 'prioritising'},
             {'trigger':'done','source':'prioritising','target':'sending'},
-            {'trigger':'done','source':'sending','target':'ready','effect':'start_timer("t",100)'},
+            {'trigger':'done','source':'sending','target':'ready','effect':'start_timer("t",300)'},
         ]
 
     def add_to_queue(self, packet : Packet):
@@ -68,9 +68,20 @@ class MQTT():
         self.queue.append(packet)
        
     def remove_low_priority_items(self):
+        new_queue = []
+
         for packet in self.queue:
-            if packet.priority < self.max_current_priority:
-                self.queue.remove(packet)
+            if packet.priority >= self.max_current_priority:
+                new_queue.append(packet)
+        
+        self.queue = new_queue
+
+        packet_sender_ids = []
+        for packet in self.queue:
+            if not packet.senderID in packet_sender_ids:
+                packet_sender_ids.append(packet.senderID)
+        
+        print("Sender ids in queue: " + packet_sender_ids.__str__())
 
     def send_queue_to_player(self):
         for packet in self.queue:
@@ -83,6 +94,7 @@ class MQTT():
                 self.players[packet.senderID].play(decoded_message)
 
         self.queue = []
+        self.max_current_priority = -1
 
     def getNewPlayer(self):
         return AudioPlayer(self.driver, self.py_audio)
