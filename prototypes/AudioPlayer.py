@@ -9,7 +9,7 @@ class AudioPlayer():
         self.logger = logging.getLogger("WalkieTalkie")
         self.py_audio = py_audio
         self.state_machine = Machine(
-            name="audio_machine"+id(self),
+            name="audio_machine_"+str(id(self)), # Unique identifier for each audio player object
             transitions=self._get_transitions(),
             states=self._get_states(),
             obj=self
