@@ -34,7 +34,7 @@ class AudioPlayer():
             {'name': 'ready'},
             {'name': 'playing', 'do': '_play(*)', 'play': 'defer'},
             {'name': 'waiting_for_next_chunk',
-                'entry': 'start_timer("t", 1000)'},
+                'entry': 'start_timer("t", 10000)'},
         ]
 
     def _play(self, data):

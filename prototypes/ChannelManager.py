@@ -5,7 +5,10 @@ import logging
 class ChannelManager():
     def __init__(self):
         self.logger = logging.getLogger("WalkieTalkie")
-        self._channels = ["ttm4115/team_09/emergency"]
+        self._channels = [
+            "ttm4115/team_09/channel1",
+            "ttm4115/team_09/emergency"
+        ]
         self.userID = uuid.uuid1().hex
 
     def get_channels(self):

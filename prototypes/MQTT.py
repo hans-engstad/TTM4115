@@ -9,15 +9,6 @@ from stmpy import Machine, Driver
 from pyaudio import PyAudio
 from packet import Packet
 
-# MQTT broker address
-MQTT_BROKER = 'mqtt.item.ntnu.no'
-MQTT_PORT = 1883
-
-# Topics for communication
-MQTT_TOPIC_INPUT = 'ttm4115/team_09/answer'
-MQTT_TOPIC_OUTPUT = 'ttm4115/team_09/answer'
-
-
 class MQTT():
 
     def __init__(self, driver: Driver, channel_manager: ChannelManager, py_audio: PyAudio):
@@ -28,10 +19,12 @@ class MQTT():
         self.py_audio = py_audio
         self.queue = []
         self.max_current_priority = -1
+
+        MQTT_BROKER = 'mqtt.item.ntnu.no'
+        MQTT_PORT = 1883
  
         # create client
-        self.logger.info(
-            f'Connecting to MQTT broker {MQTT_BROKER} at port {MQTT_PORT}')
+        self.logger.info(f'Connecting to MQTT broker {MQTT_BROKER} at port {MQTT_PORT}')
         self.mqtt_client = mqtt.Client()
         self.mqtt_client.on_connect = self.on_connect
         self.mqtt_client.on_message = self.on_message
@@ -39,7 +32,6 @@ class MQTT():
         self.mqtt_client.loop_start()
         self.update_subscriptions() 
 
-        
         # Create state machine
         self.state_machine = Machine(
             name="mqtt",
@@ -64,11 +56,11 @@ class MQTT():
 
     def _get_transitions(self):
         return [
-            {'source': 'initial', 'target': 'ready','effect':'start_timer("t",1000)'},
+            {'source': 'initial', 'target': 'ready','effect':'start_timer("t",100)'},
             {'trigger': 'receive', 'source': 'ready', 'target': 'ready', 'effect':'add_to_queue(*)'},
             {'trigger': 't', 'source': 'ready', 'target': 'prioritising'},
             {'trigger':'done','source':'prioritising','target':'sending'},
-            {'trigger':'done','source':'sending','target':'ready','effect':'start_timer("t",1000)'},
+            {'trigger':'done','source':'sending','target':'ready','effect':'start_timer("t",100)'},
         ]
 
     def add_to_queue(self, packet : Packet):
@@ -89,6 +81,8 @@ class MQTT():
 
                 decoded_message = packet.get_decoded_message()
                 self.players[packet.senderID].play(decoded_message)
+
+        self.queue = []
 
     def getNewPlayer(self):
         return AudioPlayer(self.driver, self.py_audio)
