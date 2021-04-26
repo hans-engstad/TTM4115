@@ -11,7 +11,7 @@ from packet import Packet
 
 class MQTT():
 
-    def __init__(self, driver: Driver, channel_manager: ChannelManager, py_audio: PyAudio):
+    def __init__(self, driver : Driver, channel_manager : ChannelManager, py_audio : PyAudio):
         self.logger = logging.getLogger("WalkieTalkie")
         self.players = {}  # userID -> audio player object
         self.channel_manager = channel_manager
@@ -75,13 +75,6 @@ class MQTT():
                 new_queue.append(packet)
         
         self.queue = new_queue
-
-        packet_sender_ids = []
-        for packet in self.queue:
-            if not packet.senderID in packet_sender_ids:
-                packet_sender_ids.append(packet.senderID)
-        
-        print("Sender ids in queue: " + packet_sender_ids.__str__())
 
     def send_queue_to_player(self):
         for packet in self.queue:

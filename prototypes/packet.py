@@ -3,7 +3,7 @@ import base64
 
 class Packet():
 
-    def __init__(self, priority = None, channel = None, senderID = None, encodedMessage = None):
+    def __init__(self, priority: int = None, channel: str = None, senderID: str = None, encodedMessage: str = None):
         self.priority = priority
         self.channel = channel
         self.senderID = senderID
@@ -25,16 +25,3 @@ class Packet():
         packet = json.loads(js_object)
         return Packet(packet['priority'], packet['channel'], packet['senderID'], packet['encodedMessage'])
 
-   
-
-"""
-packet = {
-    "priority":"1",
-    "encodedMessage":"gfijrg",
-    "channel":"4",
-    "senderID":"34893247382"
-}
-
-newPacket = json.dumps(packet)
-newPacket2 = Packet.deserialize(newPacket)
-print(newPacket2.senderID)"""

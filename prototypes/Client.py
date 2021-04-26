@@ -4,10 +4,16 @@ from AudioRecorder import AudioRecorder
 from UIManager import UIManager
 from MQTT import MQTT
 from ChannelManager import ChannelManager
-from logger import init_logger
+import logging
 
 # Configure module wide logger
-init_logger()
+logger = logging.getLogger('WalkieTalkie')
+logger.setLevel(logging.INFO)
+ch = logging.StreamHandler()
+ch.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s : %(filename)s : [%(levelname)s] : %(message)s')
+ch.setFormatter(formatter)
+logger.addHandler(ch)
 
 # Instantiate third-party dependencies
 py_audio = pyaudio.PyAudio()
