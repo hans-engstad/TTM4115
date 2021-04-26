@@ -58,7 +58,7 @@ class StartPage(Page):
         self.ui_manager.recorder.start_recording(channel)
 
     def stop_recording(self, channel):
-        self.ui_manager.recorder.stop_recording()
+        self.ui_manager.recorder.state_machine.send("stop")
 
     def join_channel(self, input: tk.Entry):
         channel = input.get()
