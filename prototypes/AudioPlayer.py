@@ -9,7 +9,7 @@ class AudioPlayer():
         self.logger = logging.getLogger("WalkieTalkie")
         self.py_audio = py_audio
         self.state_machine = Machine(
-            name="audio_machine_"+str(id(self)), # Unique identifier for each audio player object
+            name="audio_player_"+str(id(self)), # Unique identifier for each audio player object
             transitions=self._get_transitions(),
             states=self._get_states(),
             obj=self
@@ -19,25 +19,25 @@ class AudioPlayer():
     def _get_transitions(self):
         return [
             {'source': 'initial', 'target': 'ready'},
-            {'trigger': 'play', 'source': 'ready', 'target': 'playing',
+            {'trigger': 'receive', 'source': 'ready', 'target': 'playing',
                 'effect': self._start_player.__name__},
             {'trigger': 'done', 'source': 'playing',
                 'target': 'waiting_for_next_chunk'},
             {'trigger': 't', 'source': 'waiting_for_next_chunk',
                 'target': 'ready', 'effect': self._stop_player.__name__},
-            {'trigger': 'play', 'source': 'waiting_for_next_chunk',
+            {'trigger': 'receive', 'source': 'waiting_for_next_chunk',
                 'target': 'playing', 'effect': 'stop_timer("t")'},
         ]
 
     def _get_states(self):
         return [
             {'name': 'ready'},
-            {'name': 'playing', 'do': '_play(*)', 'play': 'defer'},
+            {'name': 'playing', 'do': '_play_chunk(*)', 'receive': 'defer'},
             {'name': 'waiting_for_next_chunk',
                 'entry': 'start_timer("t", 10000)'},
         ]
 
-    def _play(self, data):
+    def _play_chunk(self, data):
         self.audio_stream.write(data)
 
     def _start_player(self):

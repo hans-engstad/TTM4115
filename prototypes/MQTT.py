@@ -93,7 +93,6 @@ class MQTT():
         return AudioPlayer(self.driver, self.py_audio)
 
     def on_connect(self, client, userdata, flags, rc):
-        # we just log that we are connected
         self.logger.info(f'Successfully connected to MQTT broker')
 
     def on_message(self, client, userdata, msg):
@@ -102,7 +101,12 @@ class MQTT():
         self.logger.debug(f'Incoming message to topic {packet.channel}')
 
     def subscribe(self, topic):
-        self.mqtt_client.subscribe(topic)
+        QoS = 0 # No use with QoS>0 with live communication 
+        returnedMessage = self.mqtt_client.subscribe(topic, QoS)
+        if returnedMessage < 0x80:
+            self.logger.info(f"Successfully subscribed to channel {topic}")
+        else:
+            self.logger.error(f"Could not subscribe to channel {topic}")
 
     def update_subscriptions(self):
         """

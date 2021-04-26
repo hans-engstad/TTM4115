@@ -37,8 +37,7 @@ class AudioRecorder:
         sample_format = pyaudio.paInt16  # 16 bits per sample
         channels = 2
 
-        stream = self.py_audio.open(
-            format=sample_format, channels=channels, rate=fs, frames_per_buffer=chunk, input=True)
+        stream = self.py_audio.open(format=sample_format, channels=channels, rate=fs, frames_per_buffer=chunk, input=True)
 
         self._recording = True
         self.logger.info(f'Audio recording started for channel {channel}')
@@ -58,7 +57,7 @@ class AudioRecorder:
         return [
             {'name': 'ready'},
             {'name': 'recording',
-                'do': '_record(*)', "stop": "stop_recording()"},
+            'do': '_record(*)', "stop": "stop_recording()"},
         ]
 
     def _get_transitions(self):
