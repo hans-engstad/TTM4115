@@ -22,8 +22,8 @@ class Packet():
         })
 
     @classmethod
-    def deserialize(self, json : str) -> Packet:
-        packet = json.loads(json)
+    def deserialize(self, json_obj : str) -> Packet:
+        packet = json.loads(json_obj)
         return Packet(
             packet['priority'], 
             packet['channel'], 

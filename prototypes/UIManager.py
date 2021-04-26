@@ -20,27 +20,37 @@ class Page(tk.Frame):
 class StartPage(Page):
     def __init__(self, main_view, ui_manager):
         self.ui_manager = ui_manager
-        self.logger = logging.getLogger("WalkieTalkie")
 
         Page.__init__(self, main_view)
-        join_channel_input = tk.Entry(self)
-        join_channel_input.pack()
-        tk.Button(self, text="Join", command=lambda: self.join_channel(join_channel_input)).pack()
+        #join_channel_input = tk.Entry(self)
+        #join_channel_input.pack()
+        #tk.Button(self, text="Join", command=lambda: self.join_channel(join_channel_input)).pack()
         tk.Button(self, text="Exit", command=ui_manager.exit).pack()
 
         label1 = tk.Label(self, text="Available channels")
-        label1.config(font=("Courier", 24))
+        label1.config(font=("Courier", 16))
         label1.pack(side="top", fill="both", expand=True)
-        for channel in self.ui_manager.serverAPI.getAvailableChannels():
-            channel1 = tk.Label(self, text=channel)
-            channel1.pack(side="top", fill="both", expand=True)
 
+        for channel in self.ui_manager.serverAPI.getAvailableChannels():
+            self.display_unsubscribed_channel(channel)
+           
         label2 = tk.Label(self, text="Your channels")
-        label2.config(font=("Courier", 24))
+        label2.config(font=("Courier", 16))
         label2.pack(side="top", fill="both", expand=True)
 
         for channel in self.ui_manager.serverAPI.get_channels():
             self.display_channel(channel)
+
+    def display_unsubscribed_channel(self, channel : str) -> None:
+        def subscribe():
+            return self.join_channel(channel)
+
+        container = tk.Frame(self, borderwidth=1, relief="groove")
+        channel1 = tk.Label(container, text=channel)
+        channel1.pack(side="left", fill="both", expand=True)
+        tk.Button(container, text="Subscribe", command=subscribe).pack(side="left")
+        container.pack(side="top", fill="both", expand=True)
+
 
     def display_channel(self, channel : str) -> None:
         def start_on_click():
@@ -49,10 +59,10 @@ class StartPage(Page):
         def stop_on_click(): 
             return self.stop_recording(channel)
 
-        frame = tk.Frame(self, borderwidth=1)
-        tk.Label(frame, text=channel).pack(side="top", fill="both", expand=True)
-        tk.Button(frame, text="Record", command=start_on_click).pack()
-        tk.Button(frame, text="Stop", command=stop_on_click).pack()
+        frame = tk.Frame(self, borderwidth=1, relief="groove")
+        tk.Label(frame, text=channel).pack(side="left", fill="both", expand=True)
+        tk.Button(frame, text="Record", command=start_on_click).pack(side="left")
+        tk.Button(frame, text="Stop", command=stop_on_click).pack(side="left")
         frame.pack(side="top", fill="both", expand=True)
 
     def start_recording(self, channel):
@@ -61,10 +71,15 @@ class StartPage(Page):
     def stop_recording(self, channel):
         self.ui_manager.recorder.state_machine.send("stop")
 
-    def join_channel(self, input: tk.Entry):
+    """def join_channel(self, input: tk.Entry):
         channel = input.get()
         self.ui_manager.serverAPI.add_channel(channel)
         self.ui_manager.mqtt.update_subscriptions()
+        self.display_channel(channel)"""
+
+    def join_channel(self,channel):
+        self.ui_manager.serverAPI.add_channel(channel)
+        self.ui_manager.mqttAPI.update_subscriptions()
         self.display_channel(channel)
 
 
@@ -87,6 +102,7 @@ class UIManager():
                  serverAPI: ServerAPI,
                  mqttAPI: MqttAPI
                  ):
+        self.logger = logging.getLogger("WalkieTalkie")
         self.recorder = recorder
         self.driver = driver
         self.py_audio = py_audio
@@ -98,7 +114,7 @@ class UIManager():
         self.root = tk.Tk()
         main = MainView(self.root, self)
         main.pack(side="top", fill="both", expand=True)
-        self.root.wm_geometry("500x400")
+        self.root.wm_geometry("300x600")
         self.root.mainloop()
 
     def exit(self) -> None:

@@ -5,11 +5,24 @@ import logging
 class ServerAPI():
     def __init__(self):
         self.logger = logging.getLogger("WalkieTalkie")
-        self._channels = [
+        self._channels = self._get_preconfigured_channels()
+        self.userID = None
+        self._authenticate()
+
+    def _authenticate(self) -> None:
+        # fake API call
+
+        authenticated = True
+        if authenticated:
+            self.userID = uuid.uuid1().hex
+
+
+    def _get_preconfigured_channels(self) -> list:
+        # fake API call
+        return  [
             "ttm4115/team_09/channel1",
             "ttm4115/team_09/emergency"
         ]
-        self.userID = uuid.uuid1().hex
 
     def get_channels(self) -> list:
         return self._channels
