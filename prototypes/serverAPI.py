@@ -2,7 +2,7 @@ import uuid
 import logging
 
 
-class ChannelManager():
+class ServerAPI():
     def __init__(self):
         self.logger = logging.getLogger("WalkieTalkie")
         self._channels = [
@@ -11,17 +11,17 @@ class ChannelManager():
         ]
         self.userID = uuid.uuid1().hex
 
-    def get_channels(self):
+    def get_channels(self) -> list:
         return self._channels
 
-    def add_channel(self, channel):
+    def add_channel(self, channel : str) -> None:
         self.logger.info(f'Subscribed to {channel}')
         self._channels.append(channel)
 
-    def getUserID(self):
+    def getUserID(self) -> str:
         return self.userID
 
-    def getAvailableChannels(self):
+    def getAvailableChannels(self) -> list:
         # fake API call
         return [ 
             "ttm4115/team_09/channel1",
@@ -30,7 +30,7 @@ class ChannelManager():
         ]
 
 
-    def getChannelPriority(self,channel):
+    def getChannelPriority(self,channel : str) -> int:
         # fake API call
         priorities = {
             "ttm4115/team_09/channel1":1,
@@ -41,3 +41,5 @@ class ChannelManager():
             return priorities[channel]
     
         return 1
+
+   

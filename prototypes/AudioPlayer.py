@@ -16,7 +16,7 @@ class AudioPlayer():
         )
         driver.add_machine(self.state_machine)
 
-    def _get_transitions(self):
+    def _get_transitions(self) -> list:
         return [
             {'source': 'initial', 'target': 'ready'},
             {'trigger': 'receive', 'source': 'ready', 'target': 'playing',
@@ -29,7 +29,7 @@ class AudioPlayer():
                 'target': 'playing', 'effect': 'stop_timer("t")'},
         ]
 
-    def _get_states(self):
+    def _get_states(self) -> list:
         return [
             {'name': 'ready'},
             {'name': 'playing', 'do': '_play_chunk(*)', 'receive': 'defer'},
@@ -37,10 +37,10 @@ class AudioPlayer():
                 'entry': 'start_timer("t", 10000)'},
         ]
 
-    def _play_chunk(self, data):
+    def _play_chunk(self, data) -> None:
         self.audio_stream.write(data)
 
-    def _start_player(self):
+    def _start_player(self) -> None:
         self.logger.info("Audio player initiated")
         self.audio_stream = self.py_audio.open(
             format=pyaudio.paInt16,
@@ -49,12 +49,12 @@ class AudioPlayer():
             output=True
         )
 
-    def _stop_player(self):
+    def _stop_player(self) -> None:
         self.logger.info("Audio player stopped")
         self.audio_stream.stop_stream()
         self.audio_stream.close()
 
-    def play(self, decoded_message):
+    def play(self, decoded_message) -> None:
         """
         Play given audio data by sending it to the state machine. 
         If the player is already playing something else, the data 
