@@ -60,4 +60,4 @@ class AudioPlayer():
         If the player is already playing something else, the data 
         will be queued and played at a later point using defer. 
         """
-        self.state_machine.send("play", args=[decoded_message])
+        self.state_machine.send("receive", args=[decoded_message])
