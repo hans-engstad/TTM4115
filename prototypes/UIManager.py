@@ -6,7 +6,6 @@ from pyaudio import PyAudio
 from serverAPI import ServerAPI
 from mqttAPI import MqttAPI
 import sys
-import logging
 
 
 class Page(tk.Frame):
@@ -29,14 +28,14 @@ class StartPage(Page):
 
         label1 = tk.Label(self, text="Available channels")
         label1.config(font=("Courier", 16))
-        label1.pack(side="top", fill="both", expand=True)
+        label1.pack(side="top", fill="both")
 
         for channel in self.ui_manager.serverAPI.getAvailableChannels():
             self.display_unsubscribed_channel(channel)
            
         label2 = tk.Label(self, text="Your channels")
         label2.config(font=("Courier", 16))
-        label2.pack(side="top", fill="both", expand=True)
+        label2.pack(side="top", fill="both")
 
         for channel in self.ui_manager.serverAPI.get_channels():
             self.display_channel(channel)
@@ -47,9 +46,9 @@ class StartPage(Page):
 
         container = tk.Frame(self, borderwidth=1, relief="groove")
         channel1 = tk.Label(container, text=channel)
-        channel1.pack(side="left", fill="both", expand=True)
+        channel1.pack(side="left",  expand=True)
         tk.Button(container, text="Subscribe", command=subscribe).pack(side="left")
-        container.pack(side="top", fill="both", expand=True)
+        container.pack(side="top",fill="both", expand=True)
 
 
     def display_channel(self, channel : str) -> None:
@@ -71,16 +70,11 @@ class StartPage(Page):
     def stop_recording(self, channel):
         self.ui_manager.recorder.state_machine.send("stop")
 
-    """def join_channel(self, input: tk.Entry):
-        channel = input.get()
-        self.ui_manager.serverAPI.add_channel(channel)
-        self.ui_manager.mqtt.update_subscriptions()
-        self.display_channel(channel)"""
-
     def join_channel(self,channel):
-        self.ui_manager.serverAPI.add_channel(channel)
-        self.ui_manager.mqttAPI.update_subscriptions()
-        self.display_channel(channel)
+        result = self.ui_manager.serverAPI.add_channel(channel)
+        if result:
+            self.ui_manager.mqttAPI.update_subscriptions()
+            self.display_channel(channel)
 
 
 class MainView(tk.Frame):
@@ -102,7 +96,6 @@ class UIManager():
                  serverAPI: ServerAPI,
                  mqttAPI: MqttAPI
                  ):
-        self.logger = logging.getLogger("WalkieTalkie")
         self.recorder = recorder
         self.driver = driver
         self.py_audio = py_audio

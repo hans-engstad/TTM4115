@@ -103,7 +103,7 @@ class MqttAPI():
         self.logger.debug(f'Incoming message to topic {packet.channel}')
 
     def subscribe(self, topic : str) -> None:
-        QoS = 0 # No use with QoS>0 with live communication 
+        QoS = 0 # 
         returnedMessage = self.mqtt_client.subscribe(topic, QoS)
         if returnedMessage < 0x80:
             self.logger.info(f"Successfully subscribed to channel {topic}")

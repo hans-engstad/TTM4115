@@ -5,54 +5,81 @@ import logging
 class ServerAPI():
     def __init__(self):
         self.logger = logging.getLogger("WalkieTalkie")
-        self._channels = self._get_preconfigured_channels()
-        self.userID = None
-        self._authenticate()
+        self.channels = self._get_preconfigured_channels()
+        self.userID = self._authenticate()
 
     def _authenticate(self) -> None:
-        # fake API call
-
-        authenticated = True
+        """Emulated authentication request to OAuth API"""
+        authenticated = True # server checks credenti
         if authenticated:
-            self.userID = uuid.uuid1().hex
-
+            return uuid.uuid1().hex
+        return None
 
     def _get_preconfigured_channels(self) -> list:
-        # fake API call
-        return  [
-            "ttm4115/team_09/channel1",
-            "ttm4115/team_09/emergency"
-        ]
-
-    def get_channels(self) -> list:
-        return self._channels
-
-    def add_channel(self, channel : str) -> None:
-        self.logger.info(f'Subscribed to {channel}')
-        self._channels.append(channel)
-
-    def getUserID(self) -> str:
-        return self.userID
+        """Emulated response from server of channels
+        everyone will have been pre-subscribed to"""
+        
+        authorized = True # server checks credentials 
+        if authorized:
+            response = [
+                "ttm4115/team_09/channel1",
+                "ttm4115/team_09/emergency"
+            ]
+        else:
+            response = []
+        return response
 
     def getAvailableChannels(self) -> list:
-        # fake API call
-        return [ 
-            "ttm4115/team_09/channel1",
-            "ttm4115/team_09/channel2",
-            "ttm4115/team_09/emergency"
-        ]
-
+        """Emulated response from server of channels
+        thats possible for everyone to join"""
+        authorized = True # server checks credentials
+        if authorized:
+            response = [
+                "ttm4115/team_09/channel1",
+                "ttm4115/team_09/channel2",
+                "ttm4115/team_09/emergency"
+            ]
+        else:
+            response = []
+        return response
 
     def getChannelPriority(self,channel : str) -> int:
-        # fake API call
-        priorities = {
+        """Emulated response from server mapping channels
+        to a priority level"""
+
+        response = {
             "ttm4115/team_09/channel1":1,
             "ttm4115/team_09/emergency":3
         }
 
-        if channel in priorities:
-            return priorities[channel]
-    
+        if channel in response:
+            return response[channel]
+
+        # default priority level
         return 1
+
+    def get_channels(self) -> list:
+        return self.channels
+
+
+    def add_channel(self, channel : str) -> bool:
+        authorized = True  # server checks credentials 
+        if authorized:
+            if channel not in self.channels:
+                self.logger.info(f'Subscribed to {channel}')
+                self.channels.append(channel)
+                return True
+            
+            self.logger.info(f'Already subscribed to {channel}')
+            return False
+        else:
+            return False
+
+    def getUserID(self) -> str:
+        return self.userID
+
+
+    
+
 
    
