@@ -33,8 +33,7 @@ class AudioPlayer():
         return [
             {'name': 'ready'},
             {'name': 'playing', 'do': '_play_chunk(*)', 'receive': 'defer'},
-            {'name': 'waiting_for_next_chunk',
-                'entry': 'start_timer("t", 10000)'},
+            {'name': 'waiting_for_next_chunk','entry': 'start_timer("t", 10000)'},
         ]
 
     def _play_chunk(self, data) -> None:

@@ -10,7 +10,7 @@ class ServerAPI():
 
     def _authenticate(self) -> None:
         """Emulated authentication request to OAuth API"""
-        authenticated = True # server checks credenti
+        authenticated = True # server authenticates the user
         if authenticated:
             return uuid.uuid1().hex
         return None
@@ -22,7 +22,6 @@ class ServerAPI():
         authorized = True # server checks credentials 
         if authorized:
             response = [
-                "ttm4115/team_09/channel1",
                 "ttm4115/team_09/emergency"
             ]
         else:
