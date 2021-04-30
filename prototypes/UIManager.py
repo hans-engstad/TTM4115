@@ -21,9 +21,9 @@ class StartPage(Page):
         self.ui_manager = ui_manager
 
         Page.__init__(self, main_view)
-        #join_channel_input = tk.Entry(self)
-        #join_channel_input.pack()
-        #tk.Button(self, text="Join", command=lambda: self.join_channel(join_channel_input)).pack()
+        join_channel_input = tk.Entry(self)
+        join_channel_input.pack()
+        tk.Button(self, text="Join", command=lambda: self.join_channel(join_channel_input.get())).pack()
         tk.Button(self, text="Exit", command=ui_manager.exit).pack()
 
         label1 = tk.Label(self, text="Available channels")

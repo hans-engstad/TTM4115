@@ -119,7 +119,9 @@ class MqttAPI():
 
         # Resubscribe to updated channels list
         for channel in self.serverAPI.get_channels():
+            print(channel)
             self.mqtt_client.subscribe(channel)
+            
 
     def publish(self, packet : Packet) -> None:
         serializedMessage = packet.serialize()

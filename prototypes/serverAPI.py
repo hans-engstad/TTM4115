@@ -35,8 +35,7 @@ class ServerAPI():
         if authorized:
             response = [
                 "ttm4115/team_09/channel1",
-                "ttm4115/team_09/channel2",
-                "ttm4115/team_09/emergency"
+                "ttm4115/team_09/channel2"
             ]
         else:
             response = []
